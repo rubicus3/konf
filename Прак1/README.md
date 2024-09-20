@@ -134,13 +134,11 @@ Hello, bin!
 SOURCE_FILE="$PWD/$1"
 LINE=$(head -n1 $SOURCE_FILE)
 
-if [[ $1 == *.c && $(echo $LINE | grep -Eqs "\/\/|\/\*" 2>/dev/null) ]]; then
-echo "c"
+if [[ $1 == *.c && $(echo $LINE | grep -E "\/\/|\/\*" 2>/dev/null) ]]; then
 echo "Found a comment"
 elif [[ $1 == *.py && $(echo $LINE | grep -E "#" 2>/dev/null) ]]; then
 echo "Found a comment"
-elif [[ $1 == *.py && $(echo $LINE | grep -Eqs "\/\/" 2>/dev/null) ]]; then
-echo "js"
+elif [[ $1 == *.js && $(echo $LINE | grep -E "\/\/" 2>/dev/null) ]]; then
 echo "Found a comment"
 else
 echo "No comments."
