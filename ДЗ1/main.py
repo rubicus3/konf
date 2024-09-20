@@ -1,7 +1,128 @@
-import pwd
+from pwd import getpwnam
 import tkinter as tk
 from tarfile import TarFile
 import sys
+
+
+def ls(filesystem: TarFile) -> str:
+    output = ""
+    for i in filesystem.getnames():
+        output = output + i + "\n"
+    output.removesuffix("\n")
+    return output
+
+
+def whoami(filesystem: TarFile) -> str:
+    output = filesystem.name.split('/')[-1].split('.')[0]
+    return output
+
+
+def cd(filesystem: TarFile, path: str, current_dir: str) -> (str, str):
+    """
+    :param filesystem: Файловая систпема
+    :param current_dir: Текущая директория
+    :return: (output, current_dir) - Кортеж из сообщения и новой директории
+    """
+    files = filesystem.getnames()
+    files.append("")
+    to_path = ""
+    output = ""
+    # Absolute
+    if path[0] == '/':
+        to_path = path.removeprefix('/')
+    # Relative
+    else:
+        to_path = (current_dir + "/" + path).removeprefix('/')
+
+    if to_path not in files:
+        output = "cd: No such file or directory: /" + to_path
+    elif to_path.count('.') != 0:
+        output = "cd: Not a directory: /" + to_path
+    else:
+        current_dir = to_path
+    return output, current_dir
+
+
+def pwd(current_dir: str) -> str:
+    output = '/' + current_dir
+    return output
+
+class Emulator:
+    def __init__(self):
+        self.current_dir = ""
+        self.filesystem = TarFile(sys.argv[1], 'a')
+
+    def __del__(self):
+        self.filesystem.close()
+
+    def ls(self) -> str:
+        output = ""
+        for i in self.filesystem.getnames():
+            output = output + i + "\n"
+        output.removesuffix("\n")
+        return output
+
+    def whoami(self) -> str:
+        output = self.filesystem.name.split('/')[-1].split('.')[0]
+        return output
+
+    def cd(self, command: str) -> str:
+        files = self.filesystem.getnames()
+        files.append("")
+        path = command.split()[1]
+
+        if path[0] == '/':
+            # Absolute
+            to_path = path.removeprefix('/')
+        else:
+            # Relative
+            to_path = (self.current_dir + "/" + path).removeprefix('/')
+
+        if to_path not in files:
+            output = "cd: No such file or directory: /" + to_path
+        elif to_path.count('.') != 0:
+            output = "cd: Not a directory: /" + to_path
+        else:
+            output = ""
+            self.current_dir = to_path
+        return output
+
+    def chown(self, command):
+        new_owner = command.split()[1]
+        path_to_file = command.split()[2]
+        output = ""
+        try:
+            file = self.filesystem.getmember(path_to_file.removeprefix("/"))
+            file.uid = getpwnam(new_owner).pw_uid
+        except KeyError:
+            output = "Error reading a file: " + path_to_file
+
+        return output
+
+    def pwd(self) -> str:
+        output = '/' + self.current_dir
+        return output
+
+    def command_parse(self, command: str) -> str:
+        output = ""
+        if command == 'ls':
+            output = self.ls()
+
+        elif command == "whoami":
+            output = self.whoami()
+
+        elif command.startswith('cd '):
+            output = self.cd(command)
+
+        elif command.startswith('chown '):
+            output = self.chown(command)
+
+        elif command == "pwd":
+            output = self.pwd()
+
+        elif command == "exit":
+            pass
+        return output
 
 
 class ConsoleText(tk.Text):
@@ -18,7 +139,7 @@ class ConsoleText(tk.Text):
         # binding to Enter key
         self.bind("<Return>", self.enter)
 
-        self.current_dir = ""
+        self.emulator = Emulator()
 
     def _proxy(self, *args):
         largs = list(args)
@@ -39,51 +160,8 @@ class ConsoleText(tk.Text):
         command = self.get('input', 'end').strip()
         # execute code
 
-        output = ""
-        with TarFile(sys.argv[1], 'a') as filesystem:
-            if command == 'ls':
-                output = ""
-                for i in filesystem.getnames():
-                    output = output + i + "\n"
-                output.removesuffix("\n")
+        output = self.emulator.command_parse(command)
 
-            elif command == "whoami":
-                output = filesystem.name.split('/')[-1].split('.')[0]
-
-            elif command.startswith('cd '):
-                path = command.split()[1]
-                files = filesystem.getnames()
-                files.append("")
-                to_path = ""
-                # Absolute
-                if path[0] == '/':
-                    to_path = path.removeprefix('/')
-                # Relative
-                else:
-                    to_path = (self.current_dir + "/" + path).removeprefix('/')
-
-                if to_path not in files:
-                    output = "cd: No such file or directory: /" + to_path
-                elif to_path.count('.') != 0:
-                    output = "cd: Not a directory: /" + to_path
-                else:
-                    self.current_dir = to_path
-            elif command.startswith('chown '):
-                new_owner = command.split()[1]
-                path_to_file = command.split()[2]
-                try:
-                    file = filesystem.getmember(path_to_file.removeprefix("/"))
-                    file.uid = pwd.getpwnam(new_owner).pw_uid
-                except KeyError:
-                    output = "Error reading a file: " + path_to_file
-
-                print(file)
-
-            elif command == "pwd":
-                output = '/' + self.current_dir
-
-            elif command == "exit":
-                self.quit()
         # display result and next promp
         self.insert('end', f"\n{output}\n$ ")
         # move input mark
