@@ -4,49 +4,6 @@ from tarfile import TarFile
 import sys
 
 
-def ls(filesystem: TarFile) -> str:
-    output = ""
-    for i in filesystem.getnames():
-        output = output + i + "\n"
-    output.removesuffix("\n")
-    return output
-
-
-def whoami(filesystem: TarFile) -> str:
-    output = filesystem.name.split('/')[-1].split('.')[0]
-    return output
-
-
-def cd(filesystem: TarFile, path: str, current_dir: str) -> (str, str):
-    """
-    :param filesystem: Файловая систпема
-    :param current_dir: Текущая директория
-    :return: (output, current_dir) - Кортеж из сообщения и новой директории
-    """
-    files = filesystem.getnames()
-    files.append("")
-    to_path = ""
-    output = ""
-    # Absolute
-    if path[0] == '/':
-        to_path = path.removeprefix('/')
-    # Relative
-    else:
-        to_path = (current_dir + "/" + path).removeprefix('/')
-
-    if to_path not in files:
-        output = "cd: No such file or directory: /" + to_path
-    elif to_path.count('.') != 0:
-        output = "cd: Not a directory: /" + to_path
-    else:
-        current_dir = to_path
-    return output, current_dir
-
-
-def pwd(current_dir: str) -> str:
-    output = '/' + current_dir
-    return output
-
 class Emulator:
     def __init__(self):
         self.current_dir = ""
