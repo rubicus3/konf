@@ -1,13 +1,14 @@
 from pwd import getpwnam
+import getpass
 import tkinter as tk
 from tarfile import TarFile
 import sys
 
 
 class Emulator:
-    def __init__(self):
+    def __init__(self, filesystem: TarFile):
         self.current_dir = ""
-        self.filesystem = TarFile(sys.argv[1], 'a')
+        self.filesystem = filesystem
 
     def __del__(self):
         self.filesystem.close()
@@ -16,17 +17,22 @@ class Emulator:
         output = ""
         for i in self.filesystem.getnames():
             output = output + i + "\n"
-        output.removesuffix("\n")
+        output = output.strip()
+        print(output)
         return output
 
     def whoami(self) -> str:
-        output = self.filesystem.name.split('/')[-1].split('.')[0]
+        # output = self.filesystem.name.split('/')[-1].split('.')[0]
+        output = getpass.getuser()
         return output
 
     def cd(self, command: str) -> str:
         files = self.filesystem.getnames()
         files.append("")
-        path = command.split()[1]
+        try:
+            path = command.split()[1]
+        except IndexError:
+            return "cd: Provide additional arguments"
 
         if path[0] == '/':
             # Absolute
@@ -44,9 +50,12 @@ class Emulator:
             self.current_dir = to_path
         return output
 
-    def chown(self, command):
-        new_owner = command.split()[1]
-        path_to_file = command.split()[2]
+    def chown(self, command) -> str:
+        try:
+            new_owner = command.split()[1]
+            path_to_file = command.split()[2]
+        except IndexError:
+            return "chown: Provide additional arguments"
         output = ""
         try:
             file = self.filesystem.getmember(path_to_file.removeprefix("/"))
@@ -68,17 +77,19 @@ class Emulator:
         elif command == "whoami":
             output = self.whoami()
 
-        elif command.startswith('cd '):
+        elif command.split()[0] == "cd":
             output = self.cd(command)
 
-        elif command.startswith('chown '):
+        elif command.split()[0] == "chown":
             output = self.chown(command)
 
         elif command == "pwd":
             output = self.pwd()
 
         elif command == "exit":
-            pass
+            sys.exit()
+        else:
+            output = "Unknown command: " + command
         return output
 
 
@@ -96,7 +107,7 @@ class ConsoleText(tk.Text):
         # binding to Enter key
         self.bind("<Return>", self.enter)
 
-        self.emulator = Emulator()
+        self.emulator = Emulator(TarFile(sys.argv[1], 'a'))
 
     def _proxy(self, *args):
         largs = list(args)
