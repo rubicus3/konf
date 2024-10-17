@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <visualizer_path>/usr/bin/dot</visualizer_path>
+  <repository_path>/home/rubicus/Проекты/davis</repository_path>
+  <result_file_path>result.dot</result_file_path>
+  <branch_name>main</branch_name>
+</root>
