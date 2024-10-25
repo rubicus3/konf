@@ -120,6 +120,15 @@ in {
 000
 ```
 
+```
+BNF = '''
+E = <word4> | <word6>
+<word4> = <letters> <letters> <letters> <letters>
+<word6> = <letters> <letters> <letters> <letters> <letters> <letters>
+<letters> = 1 | 0
+'''
+```
+
 ## Задача 4
 
 Язык правильно расставленных скобок двух видов.
@@ -132,6 +141,17 @@ in {
 {}
 ```
 
+```
+BNF = '''
+E = logic_start body logic_end | function 
+logic_start = {
+logic_end = }
+body = function | expression
+function = () | (())
+expression = ({}) | {{}}
+'''
+```
+
 ## Задача 5
 
 Язык выражений алгебры логики.
@@ -142,6 +162,18 @@ y & ~(y)
 (~(y) & y & ~y)
 ~x
 ~((x) & y | (y) | (x)) & x | x | (y & ~y)
+```
+
+```
+BNF = '''
+E = logic_pr br_l expr br_r | expr
+expr = logic_pr var logic var | logic_pr br_l var logic var br_r logic var | logic var | logic_pr var
+var = x | y
+logic = & | /
+logic_pr = ~ | 
+br_l = (
+br_r = )
+'''
 ```
 
 ## Полезные ссылки

@@ -23,8 +23,11 @@ def generate_phrase(grammar, start):
 
 
 BNF = '''
-E = 10 | 100 | 11 | 101101 | 000
-E = (({((()))})) | {} | {()} | () | {}
+E = <word4> | <word6>
+<word4> = <letters> <letters> <letters> <letters>
+<word6> = <letters> <letters> <letters> <letters> <letters> <letters>
+<letters> = 1 | 0
 '''
+
 for i in range(10):
     print(generate_phrase(parse_bnf(BNF), 'E'))
