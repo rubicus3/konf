@@ -1,0 +1,12 @@
+<root>
+    <!-- Корневой элемент -->
+    <name>Пример</name>
+    <!-- Важный комментарий -->
+    <value>42</value>
+    <nested>
+        <!-- Вложенный словарь
+         (и многострочный комментарий) -->
+        <innerName>Вложенный пример</innerName>
+        <innerValue>24</innerValue>
+    </nested>
+</root>
