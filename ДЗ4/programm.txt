@@ -1,4 +1,6 @@
-a=5
-b=7
-c=b
-a=bitreverse(c)
+a0=0
+a1=1000
+t0=a0
+t1=a1
+res0=bitreverse(t0)
+res1=bitreverse(t1)
