@@ -138,7 +138,7 @@ class Interpreter:
                 address1 = int(command[3:7], 2)
                 address2 = int(command[7:11], 2)
                 value = self.MEMORY[address2]
-                reversed = int(bin(value)[2:][::-1], 2)
+                reversed = int(bin(value)[2:].zfill(28)[::-1], 2)
                 self.MEMORY[address1] = reversed
 
         self.log_result()
