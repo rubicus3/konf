@@ -1,6 +1,9 @@
 a0=0
-a1=1000
+a1=1
+a2=235723
 t0=a0
 t1=a1
+t2=a2
 res0=bitreverse(t0)
 res1=bitreverse(t1)
+res3=bitreverse(t2)
